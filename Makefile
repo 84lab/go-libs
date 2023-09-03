@@ -19,7 +19,7 @@ check: fmt lint unit-test swag
 unit-test:
 	@echo "  >  Running unit tests"
 	go clean -testcache
-	GOBIN=$(GOBIN) go test -cover -race -coverprofile=coverage.txt -covermode=atomic -v ./internal... ./pkg...
+	GOBIN=$(GOBIN) go test -cover -race -coverprofile=coverage.txt -covermode=atomic -v ./...
 
 fmt:
 	@echo "  >  Format all go files"
