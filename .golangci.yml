@@ -91,13 +91,12 @@ linters:
     - unconvert
     - whitespace
     - wrapcheck
-  disable:
-    - unparam
-    - wastedassign
-    - tparallel
-    - rowserrcheck
-    - sqlclosecheck
-    - gomnd
-    - staticcheck
-    - bodyclose
-    - nilerr
+    # - unparam
+    # - wastedassign
+    # - tparallel
+    # - rowserrcheck
+    # - sqlclosecheck
+    # - gomnd
+    # - staticcheck
+    # - bodyclose
+    # - nilerr
