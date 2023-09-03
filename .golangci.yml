@@ -1,0 +1,103 @@
+service:
+  golangci-lint-version: 1.52.2
+
+run:
+  tests: false
+  modules-download-mode: readonly
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: true
+  funlen:
+    lines: 100
+    statements: 75
+  gofumpt:
+    extra-rules: true
+  govet:
+    check-shadowing: true
+    enable-all: true
+    disable:
+      - fieldalignment
+  misspell:
+    locale: US
+    ignore-words:
+  nolintlint:
+    allow-unused: false
+    allow-leading-space: true
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/84lab)
+  unparam:
+    check-exported: true
+  unused:
+    check-exported: true
+  errorlint:
+    errorf: true
+  gocyclo:
+    min-complexity: 25
+  wrapcheck:
+    ignorePackageGlobs:
+      - github.com/84lab/*
+issues:
+  new: false
+linters:
+  disable-all: true
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - typecheck
+    - unused
+    - asciicheck
+    - dupl
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - forcetypeassert
+    - funlen
+    - gci
+    - gochecknoglobals
+    - gochecknoinits
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - goerr113
+    - gofmt
+    - gofumpt
+    - goimports
+    - goprintffuncname
+    - gosec
+    - importas
+    - lll
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nlreturn
+    - nolintlint
+    - paralleltest
+    - prealloc
+    - predeclared
+    - revive
+    - stylecheck
+    - testpackage
+    - thelper
+    - unconvert
+    - whitespace
+    - wrapcheck
+  disable:
+    - unparam
+    - wastedassign
+    - tparallel
+    - rowserrcheck
+    - sqlclosecheck
+    - gomnd
+    - staticcheck
+    - bodyclose
+    - nilerr
