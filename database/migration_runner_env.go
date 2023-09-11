@@ -1,10 +1,12 @@
-
 package database
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // Constants representing environment variable keys for migration configuration.
@@ -15,6 +17,11 @@ const (
 	envKeyFilesDir     = "MIGRATION_FILES_DIR"
 )
 
+var (
+	ErrMissingDsnEnv       = errors.New("missing env: MIGRATION_DSN")
+	ErrMissingOperationEnv = errors.New("missing env: MIGRATION_OPERATION")
+)
+
 func readForceVersion() (int, error) {
 	forceVersionRaw, ok := os.LookupEnv(envKeyForceVersion)
 	if !ok {
@@ -23,7 +30,7 @@ func readForceVersion() (int, error) {
 
 	forceVersion, err := strconv.Atoi(forceVersionRaw)
 	if err != nil {
-		return 0, fmt.Errorf("convert forceVersion: %v", err)
+		return 0, fmt.Errorf("convert forceVersion: %w", err)
 	}
 
 	return forceVersion, nil
@@ -31,56 +38,62 @@ func readForceVersion() (int, error) {
 
 // RunMigrationsFromEnv reads migration configuration from environment variables,
 // creates a MigrationRunner, and runs the specified migration operation.
-func RunMigrationsFromEnv(logger logger) error {
+func RunMigrationsFromEnv() error {
 	dsn, ok := os.LookupEnv(envKeyDsn)
 	if !ok {
-		return fmt.Errorf("missing env: %s", envKeyDsn)
+		return ErrMissingDsnEnv
 	}
 
 	operation, ok := os.LookupEnv(envKeyOp)
 	if !ok {
-		return fmt.Errorf("missing env: %s", envKeyOp)
+		return ErrMissingOperationEnv
 	}
 
 	forceVersion, err := readForceVersion()
 	if err != nil {
-		return fmt.Errorf("read forceVersion: %v", err)
+		return fmt.Errorf("failed to read forceVersion: %w", err)
 	}
 
-	opts := []Option{WithLogger(logger)}
+	opts := []Option{}
 	if filesDir, ok := os.LookupEnv(envKeyFilesDir); ok {
 		opts = append(opts, WithFilesDir(filesDir))
 	}
 
 	runner, err := NewMigrationRunner(dsn, opts...)
 	if err != nil {
-		return fmt.Errorf("new migrations runner: %v", err)
+		return fmt.Errorf("failed to create a new migration runner: %w", err)
 	}
 
 	// Get the current migration version and log it.
 	version, dirty, err := runner.Version()
 	if err != nil {
-		logger.Error(fmt.Sprintf("getting current migration version: %v", err))
-	} else {
-		logger.Info(fmt.Sprintf("migration version before operation: %d, dirty: %v", version, dirty))
+		return fmt.Errorf("failed to get migration version before operation: %w", err)
 	}
 
-	if err := runner.Run(OperationData{
+	log.WithFields(log.Fields{
+		"version": version,
+		"dirty":   dirty,
+	}).Info("Migration version before operation")
+
+	if err = runner.Run(OperationData{
 		ID:           operation,
 		ForceVersion: forceVersion,
 	}); err != nil {
-		return fmt.Errorf("run operation %s: %v", operation, err)
+		return fmt.Errorf("run operation %s: %w", operation, err)
 	}
 
-	logger.Info("successfully finished migration")
+	log.Info("Successfully finished migration")
 
 	// Get the migration version after the operation and log it.
 	version, dirty, err = runner.Version()
 	if err != nil {
-		return fmt.Errorf("getting migration version after operation: %v", err)
+		return fmt.Errorf("failed to get migration version after operation: %w", err)
 	}
 
-	logger.Info(fmt.Sprintf("migration version after operation: %d, dirty: %v", version, dirty))
+	log.WithFields(log.Fields{
+		"version": version,
+		"dirty":   dirty,
+	}).Info("Migration version after operation")
 
 	return nil
 }
