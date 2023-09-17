@@ -14,16 +14,16 @@ var (
 )
 
 type Claim struct {
-	Payload interface{} `json:"payload"`
+	UserID string `json:"user_id"`
 
 	jwt.StandardClaims
 }
 
-func NewClaim(padyload interface{}, ttl time.Duration) *Claim {
+func NewClaim(userID string, ttl time.Duration) *Claim {
 	expiresAt := time.Now().Add(ttl)
 
 	claims := &Claim{
-		Payload:        padyload,
+		UserID:         userID,
 		StandardClaims: jwt.StandardClaims{ExpiresAt: expiresAt.Unix()},
 	}
 

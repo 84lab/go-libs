@@ -6,7 +6,6 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	// required by migrate.New... to parse migration files directory
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	log "github.com/sirupsen/logrus"
 )
