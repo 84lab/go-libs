@@ -1,8 +1,10 @@
 package jwt
 
 import (
+	"crypto/rand"
 	"errors"
 	"fmt"
+	"math/big"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -14,16 +16,22 @@ var (
 )
 
 type Claim struct {
-	UserID string `json:"user_id"`
-
+	UserID       string `json:"user_id"`
+	RandomFactor int64  `json:"random_factor"` // allows to generate uniq jwt tokens within 1 sec
 	jwt.StandardClaims
 }
 
 func NewClaim(userID string, ttl time.Duration) *Claim {
 	expiresAt := time.Now().Add(ttl)
 
+	randomNum, err := rand.Int(rand.Reader, big.NewInt(100))
+	if err != nil {
+		randomNum = &big.Int{}
+	}
+
 	claims := &Claim{
 		UserID:         userID,
+		RandomFactor:   randomNum.Int64(),
 		StandardClaims: jwt.StandardClaims{ExpiresAt: expiresAt.Unix()},
 	}
 
